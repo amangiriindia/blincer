@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final WeatherService _weatherService = WeatherService();
-  String name = 'HackHustler';
+  String name = 'Blinker User';
   String currentLocation = 'Fetching...';
   String weatherCondition = '';
   String weatherIconUrl = '';
@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _getCurrentWeather('San Francisco'); // Default city
+    _getCurrentWeather('Bengaluru'); // Default city
   }
 
   void _showLocationModal() {
