@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../constant/app_color.dart';
-import 'base/button_nav_bar.dart';
-import 'home_scrren.dart';
 import 'login_screen.dart';
 
 class OnBoardingScreen extends StatefulWidget {
@@ -84,7 +82,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     widget.onDone();
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => BottomNavBar()),
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
                     );
                   },
                   title: "Get Started",

@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _getCurrentWeather('Bengaluru'); // Default city
+   // _getCurrentWeather('Bengaluru'); // Default city
   }
 
   void _showLocationModal() {
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _getCurrentWeather(String city) async {
     try {
-      final weatherData = await _weatherService.getWeather(city);
+     final weatherData = await _weatherService.getWeather(city);
       setState(() {
         weatherCondition = weatherData['current']['condition']['text'];
         weatherIconUrl = "https:${weatherData['current']['condition']['icon']}";
@@ -102,17 +102,20 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          weatherIconUrl.isNotEmpty
-              ? Image.network(weatherIconUrl, height: 50)
-              : CircularProgressIndicator(color: Colors.white),
-          SizedBox(height: 8),
-          Text(
-            "$weatherCondition | ${temperature.toStringAsFixed(1)}°C",
-            style: TextStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    weatherIconUrl.isNotEmpty
+        ? Image.network(weatherIconUrl, height: 50)
+        : Icon(Icons.cloud, color: Colors.white, size: 50), // Default cloud icon
+    SizedBox(height: 8),
+    Text(
+      "$weatherCondition | ${temperature.toStringAsFixed(1)}°C",
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
           SizedBox(height: 8),
           Text("Welcome to Blincer",
               style: TextStyle(

@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 
 import '../constant/app_color.dart';
+import 'base/button_nav_bar.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -43,9 +44,15 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = false;
     });
 
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BottomNavBar(),
+      ),
+    );
     Fluttertoast.showToast(
-      msg: "Login failed. Please try again.",
-      backgroundColor: Colors.red,
+      msg: "Login Sucessfully ",
+      backgroundColor: Colors.green,
       textColor: Colors.white,
     );
   }
