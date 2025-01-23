@@ -1,7 +1,7 @@
+import 'package:blinker/service/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
-
 import '../constant/app_color.dart';
 import 'base/button_nav_bar.dart';
 import 'signup_screen.dart';
@@ -19,43 +19,64 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   Future<void> _login() async {
-    setState(() {
-      _isLoading = true;
-    });
+  setState(() {
+    _isLoading = true;
+  });
 
-    final emailPhone = _emailPhoneController.text;
-    final password = _passwordController.text;
+  final emailPhone = _emailPhoneController.text.trim();
+  final password = _passwordController.text.trim();
 
-    if (emailPhone.isEmpty || password.isEmpty) {
-      Fluttertoast.showToast(
-        msg: "Please enter valid credentials",
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
-    //final result = await _apiService.loginSendOtp(emailPhone);  // Assuming your login API method
-
+  if (emailPhone.isEmpty || password.isEmpty) {
+    Fluttertoast.showToast(
+      msg: "Please enter valid credentials",
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
     setState(() {
       _isLoading = false;
     });
+    return;
+  }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BottomNavBar(),
-      ),
-    );
+  try {
+    final authService = AuthService();
+    final result = await authService.loginUser(emailPhone, password);
+
+    // If login is successful
+    if (result['success']) {
+      Fluttertoast.showToast(
+        msg: result['message'], // Display success message
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+
+      // Navigate to the next screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BottomNavBar(),
+        ),
+      );
+    }else if(!result['success']){
+Fluttertoast.showToast(
+        msg: result['message'], // Display success message
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
+  } catch (e) {
+    // Show error message returned from API
     Fluttertoast.showToast(
-      msg: "Login Sucessfully ",
-      backgroundColor: Colors.green,
+      msg: e.toString().replaceFirst("Exception: ", ""), // Clean up the message
+      backgroundColor: Colors.red,
       textColor: Colors.white,
     );
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {
