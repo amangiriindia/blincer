@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 import '../constant/app_color.dart';
+import '../constant/user_constant.dart';
 import 'base/button_nav_bar.dart';
 import 'signup_screen.dart';
 
@@ -18,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _login() async {
+ Future<void> _login() async {
   setState(() {
     _isLoading = true;
   });
@@ -42,13 +43,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final authService = AuthService();
     final result = await authService.loginUser(emailPhone, password);
 
-    // If login is successful
     if (result['success']) {
       Fluttertoast.showToast(
-        msg: result['message'], // Display success message
+        msg: result['message'],
         backgroundColor: Colors.green,
         textColor: Colors.white,
       );
+
+      // Load user data into app-wide variables
+      await UserConstant.loadUserData();
 
       // Navigate to the next screen
       Navigator.pushReplacement(
@@ -57,17 +60,16 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (context) => BottomNavBar(),
         ),
       );
-    }else if(!result['success']){
-Fluttertoast.showToast(
-        msg: result['message'], // Display success message
+    } else {
+      Fluttertoast.showToast(
+        msg: result['message'],
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );
     }
   } catch (e) {
-    // Show error message returned from API
     Fluttertoast.showToast(
-      msg: e.toString().replaceFirst("Exception: ", ""), // Clean up the message
+      msg: e.toString().replaceFirst("Exception: ", ""),
       backgroundColor: Colors.red,
       textColor: Colors.white,
     );

@@ -1,4 +1,5 @@
 import 'package:blinker/constant/app_color.dart';
+import 'package:blinker/constant/user_constant.dart';
 import 'package:flutter/material.dart';
 
 import '../card_screen.dart';
@@ -22,6 +23,15 @@ class _ModernBottomNavBarState extends State<BottomNavBar> {
     FavoritesScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    UserConstant.loadUserData();
+    super.initState();
+    print(UserConstant.EMAIL);
+    print(UserConstant.NAME);
+    print(UserConstant.TOKEN);
+  }
 
   @override
   Widget build(BuildContext context) {

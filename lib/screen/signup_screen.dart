@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
 import '../constant/app_color.dart';
+import '../service/auth_service.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -20,20 +21,24 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
-
+  final AuthService _authService = AuthService();
   Future<void> _signup() async {
     setState(() {
       _isLoading = true;
     });
 
-    final name = _nameController.text;
-    final email = _emailController.text;
-    final phone = _phoneController.text;
-    final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
 
-    // Simple validation
-    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    // Basic validation
+    if (name.isEmpty ||
+        email.isEmpty ||
+        phone.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       Fluttertoast.showToast(
         msg: "Please fill in all fields.",
         backgroundColor: Colors.red,
@@ -57,18 +62,35 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    // Assuming your signup API method
-    // final result = await _apiService.signup(name, email, phone, password);
+    // Call AuthService to register user
+    final result = await _authService.registerUser(
+      name: name,
+      email: email,
+      phone: phone,
+      password: password,
+    );
 
     setState(() {
       _isLoading = false;
     });
 
-    Fluttertoast.showToast(
-      msg: "Signup failed. Please try again.",
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-    );
+    if (result['success']) {
+      Fluttertoast.showToast(
+        msg: result['message'],
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: result['message'],
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
   }
 
   @override
@@ -107,7 +129,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
               // Signup Form
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
                 child: Column(
                   children: [
                     // Name Input Field
@@ -115,7 +138,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       elevation: 2,
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -150,7 +174,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       elevation: 2,
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -186,7 +211,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       elevation: 2,
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -222,7 +248,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       elevation: 2,
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -243,7 +270,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: "Enter your password",
-                                  hintStyle: const TextStyle(color: Colors.grey),
+                                  hintStyle:
+                                      const TextStyle(color: Colors.grey),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       _isPasswordVisible
@@ -253,7 +281,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     color: AppColor.primary,
                                     onPressed: () {
                                       setState(() {
-                                        _isPasswordVisible = !_isPasswordVisible;
+                                        _isPasswordVisible =
+                                            !_isPasswordVisible;
                                       });
                                     },
                                   ),
@@ -271,7 +300,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       elevation: 2,
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -292,7 +322,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: "Confirm your password",
-                                  hintStyle: const TextStyle(color: Colors.grey),
+                                  hintStyle:
+                                      const TextStyle(color: Colors.grey),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       _isConfirmPasswordVisible
@@ -302,7 +333,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     color: AppColor.primary,
                                     onPressed: () {
                                       setState(() {
-                                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                                        _isConfirmPasswordVisible =
+                                            !_isConfirmPasswordVisible;
                                       });
                                     },
                                   ),
@@ -350,7 +382,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
-                      const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // Don't have an account? Register
                     Row(
