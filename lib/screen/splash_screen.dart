@@ -1,10 +1,11 @@
+import 'package:blinker/constant/user_constant.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../constant/common_function.dart';
+import 'base/button_nav_bar.dart';
 import 'on_boarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({Key? key}) : super(key: key);
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -18,36 +19,36 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // Initial delay before checking login status
+    // Initial delay to show splash screen logo
     await Future.delayed(const Duration(seconds: 2));
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? isLoggedIn = prefs.getBool('isLoggedIn');
+    // Show loading dialog
+    CommonFunction.showLoadingDialog(context);
 
-    // Navigate based on the login status
-    if (isLoggedIn == true) {
-      CommonFunction.showLoadingDialog(context);
-      await Future.delayed(const Duration(seconds: 1));
-      CommonFunction.hideLoadingDialog(context);
-      // Show loading dialog
+    // Simulate additional delay for processing (if needed)
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Hide loading dialog
+    CommonFunction.hideLoadingDialog(context);
+    print("User token ${UserConstant.TOKEN}");
+    // Navigate based on login status
+    if (UserConstant.TOKEN != null) {
+      // Navigate to BottomNavBar if logged in
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-            builder: (context) => OnBoardingScreen(
-                  onDone: () {},
-                )),
+        MaterialPageRoute(builder: (context) => BottomNavBar()),
         (Route<dynamic> route) => false,
       );
     } else {
-      CommonFunction.showLoadingDialog(context);
-      await Future.delayed(const Duration(seconds: 1));
-      CommonFunction.hideLoadingDialog(context);
+      // Navigate to OnBoardingScreen if not logged in
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => OnBoardingScreen(
-                  onDone: () {},
-                )),
+          builder: (context) => OnBoardingScreen(
+            onDone: () {
+            },
+          ),
+        ),
         (Route<dynamic> route) => false,
       );
     }
@@ -56,16 +57,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Center(
-            child: Image.asset(
-              'assets/images/logo.jpeg',
-              width: 120, // Set the specific width
-              height: 120, // Set the specific height
-            ),
-          ),
-        ],
+      body: Center(
+        child: Image.asset(
+          'assets/images/logo.jpeg',
+          width: 120,
+          height: 120,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

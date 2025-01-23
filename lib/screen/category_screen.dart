@@ -1,49 +1,75 @@
-import 'package:blinker/constant/app_color.dart';
-import 'package:blinker/screen/base/home_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:blinker/constant/app_color.dart';
 
-class CategoryScreen extends StatelessWidget {
-  final List<Map<String, String>> categories = [
-    {"name": "Electronics", "image": "https://via.placeholder.com/150/0000FF/808080?text=Electronics"},
-    {"name": "Fashion", "image": "https://via.placeholder.com/150/FF69B4/808080?text=Fashion"},
-    {"name": "Home Decor", "image": "https://via.placeholder.com/150/008000/FFFFFF?text=Home+Decor"},
-    {"name": "Beauty", "image": "https://via.placeholder.com/150/FFD700/808080?text=Beauty"},
-    {"name": "Toys", "image": "https://via.placeholder.com/150/FFA500/808080?text=Toys"},
-    {"name": "Sports", "image": "https://via.placeholder.com/150/DC143C/FFFFFF?text=Sports"},
-  ];
+import '../service/catrgory_service.dart';
+
+class CategoryScreen extends StatefulWidget {
+  @override
+  _CategoryScreenState createState() => _CategoryScreenState();
+}
+
+class _CategoryScreenState extends State<CategoryScreen> {
+  final CategoryService _categoryService = CategoryService();
+  List<dynamic> _categories = [];
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    try {
+      final categories = await _categoryService.getAllCategories();
+      setState(() {
+        _categories = categories;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: HomeAppBar(title: 'Categories',),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.purple.shade50, Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 3 / 4,
-            ),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              return CategoryCard(
-                name: categories[index]['name']!,
-                image: categories[index]['image']!,
-              );
-            },
-          ),
-        ),
+      appBar: AppBar(
+        title: Text('Categories'),
+        backgroundColor: AppColor.primary,
       ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _hasError
+              ? Center(child: Text('Failed to load categories'))
+              : _categories.isEmpty
+                  ? Center(child: Text('No Categories Found'))
+                  : Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 3 / 4,
+                        ),
+                        itemCount: _categories.length,
+                        itemBuilder: (context, index) {
+                          final category = _categories[index];
+                          return CategoryCard(
+                            name: category['name'] ?? 'Unknown',
+                            image: category['photo'] != null
+                                ? 'data:image/png;base64,${category['photo']['data']}'
+                                : 'https://via.placeholder.com/150', // Default image
+                          );
+                        },
+                      ),
+                    ),
     );
   }
 }
@@ -83,21 +109,8 @@ class CategoryCard extends StatelessWidget {
                   image,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    }
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
-                    );
-                  },
                   errorBuilder: (context, error, stackTrace) {
-                    return Center(child: Icon(Icons.error, color: Colors.red));
+                    return Icon(Icons.image, size: 60, color: Colors.grey);
                   },
                 ),
               ),
