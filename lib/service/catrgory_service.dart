@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../constant/app_constant.dart';
+
 class CategoryService {
   final String baseUrl =
-      "http://192.168.1.20:8080"; // Replace with your actual API base URL
+      "http://192.168.1.20:8080/api/v1/category/all-category"; // Replace with your actual API base URL
 
   Future<List<dynamic>> getAllCategories() async {
-    final url = Uri.parse('http://192.168.1.20:8080/api/v1/category/all-category');
+    final url = Uri.parse('${AppConstant.LOCAL_API_URL}/api/v1/category/all-category');
     try {
       final response = await http.get(url);
       print(response.statusCode);

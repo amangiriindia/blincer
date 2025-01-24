@@ -1,6 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:blinker/constant/app_color.dart';
-
+import '../screenutills/category_product_screen.dart';
 import '../service/catrgory_service.dart';
 
 class CategoryScreen extends StatefulWidget {
@@ -61,11 +62,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         itemCount: _categories.length,
                         itemBuilder: (context, index) {
                           final category = _categories[index];
+                          final photoData = category['photo']?['data']?['data'];
+                          Uint8List? imageBytes;
+
+                          if (photoData != null) {
+                            imageBytes = Uint8List.fromList(
+                                List<int>.from(photoData));
+                          }
+
                           return CategoryCard(
                             name: category['name'] ?? 'Unknown',
-                            image: category['photo'] != null
-                                ? 'data:image/png;base64,${category['photo']['data']}'
-                                : 'https://via.placeholder.com/150', // Default image
+                            imageBytes: imageBytes,
+                            categoryId :  category['_id'] ?? '6695f6bc8a516bd69f7c52e3',
                           );
                         },
                       ),
@@ -76,16 +84,26 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
 class CategoryCard extends StatelessWidget {
   final String name;
-  final String image;
+  final Uint8List? imageBytes;
+  final String categoryId; // Add categoryId
 
-  const CategoryCard({required this.name, required this.image});
+  const CategoryCard({
+    required this.name,
+    this.imageBytes,
+    required this.categoryId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate to category details or list of products
-        print('Tapped on $name');
+        // Navigate to CategoryProductScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryProductScreen(categoryId: categoryId),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -105,14 +123,17 @@ class CategoryCard extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  image,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.image, size: 60, color: Colors.grey);
-                  },
-                ),
+                child: imageBytes != null
+                    ? Image.memory(
+                        imageBytes!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      )
+                    : Icon(
+                        Icons.image,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
               ),
             ),
             SizedBox(height: 8),

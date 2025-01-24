@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../constant/app_constant.dart';
 import '../constant/user_constant.dart';
 
 class AuthService {
   static const String baseUrl = "http://192.168.1.20:8080";
 
 Future<Map<String, dynamic>> loginUser(String email, String password) async {
-  final url = Uri.parse('$baseUrl/api/v1/user/login');
+  final url = Uri.parse('${AppConstant.LOCAL_API_URL}/api/v1/user/login');
   try {
     final response = await http.post(
       url,
@@ -48,7 +49,7 @@ Future<Map<String, dynamic>> loginUser(String email, String password) async {
     required String phone,
     required String password,
   }) async {
-    final url = Uri.parse('$baseUrl/api/v1/user/create-profile');
+    final url = Uri.parse('${AppConstant.LOCAL_API_URL}/api/v1/user/create-profile');
     try {
       final response = await http.post(
         url,
