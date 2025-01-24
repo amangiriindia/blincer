@@ -76,6 +76,7 @@ class _CategoryProductScreenState extends State<CategoryProductScreen> {
                           }
 
                           return ProductCard(
+                            id:product['_id'] ,
                             name: product['name'] ?? 'Unknown',
                             price: product['price']?.toString() ?? 'N/A',
                             imageBytes: imageBytes,

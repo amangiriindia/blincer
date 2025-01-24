@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:draggable_home/draggable_home.dart';
 import '../constant/app_color.dart';
 import '../constant/voice_to_text.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../screenutills/product_details_screen.dart';
+import '../service/product_service.dart';
 import '../service/weather_service.dart';
 import '../widget/location_popup.dart';
 
@@ -21,16 +25,38 @@ class _HomeScreenState extends State<HomeScreen> {
   String weatherIconUrl = '';
   double temperature = 0.0;
   String? currentAddress;
+final ProductService _productService = ProductService();
+List<dynamic> _products = [];
+bool _isLoading = true;
+
 
   @override
   void initState() {
     super.initState();
    // _getCurrentWeather('Bengaluru'); // Default city
+   _fetchProducts();
   }
 
   void _showLocationModal() {
     showLocationModal(context);
   }
+  Future<void> _fetchProducts() async {
+  try {
+    setState(() {
+      _isLoading = true;
+    });
+    final products = await _productService.fetchProducts('grocery');
+    setState(() {
+      _products = products;
+      _isLoading = false;
+    });
+  } catch (e) {
+    setState(() {
+      _isLoading = false;
+    });
+    print('Error fetching products: $e');
+  }
+}
 
   Future<void> _getCurrentWeather(String city) async {
     try {
@@ -181,26 +207,45 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 3 / 4,
-      ),
-      itemCount: 8,
-      itemBuilder: (context, index) {
-        return Container(
+  if (_isLoading) {
+    return Center(child: CircularProgressIndicator());
+  }
+
+  if (_products.isEmpty) {
+    return Center(child: Text("No products found."));
+  }
+
+  return GridView.builder(
+    shrinkWrap: true,
+    physics: NeverScrollableScrollPhysics(),
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      childAspectRatio: 3 / 4,
+    ),
+    itemCount: _products.length,
+    itemBuilder: (context, index) {
+      final product = _products[index];
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailsScreen(productId: product['_id']),
+            ),
+          );
+        },
+        child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 2),
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 8,
+                spreadRadius: 2,
+              ),
             ],
           ),
           child: Column(
@@ -209,8 +254,13 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.network("https://via.placeholder.com/150",
-                      fit: BoxFit.cover),
+                  child: product['store']['logo']['Data']['data'] != null
+                      ? Image.memory(
+                          Uint8List.fromList(
+                              List<int>.from(product['store']['logo']['Data']['data'])),
+                          fit: BoxFit.cover,
+                        )
+                      : Icon(Icons.image, size: 50),
                 ),
               ),
               Padding(
@@ -218,19 +268,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Product ${index + 1}",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      product['name'] ?? 'No Name',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     SizedBox(height: 4),
-                    Text("\$${(index + 1) * 10}",
-                        style: TextStyle(
-                            color: Colors.green, fontWeight: FontWeight.bold)),
+                    Text(
+                      product['description'] ?? 'No Description',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
 }
