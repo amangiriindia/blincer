@@ -19,40 +19,36 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // Initial delay to show splash screen logo
-    await Future.delayed(const Duration(seconds: 2));
+  await Future.delayed(const Duration(seconds: 2));
 
-    // Show loading dialog
-    CommonFunction.showLoadingDialog(context);
+  CommonFunction.showLoadingDialog(context);
+  await Future.delayed(const Duration(seconds: 1));
 
-    // Simulate additional delay for processing (if needed)
-    await Future.delayed(const Duration(seconds: 1));
+  // Load user data
+  await UserConstant.loadUserData();
 
-    // Hide loading dialog
-    CommonFunction.hideLoadingDialog(context);
-    print("User token ${UserConstant.TOKEN}");
-    // Navigate based on login status
-    if (UserConstant.TOKEN != null) {
-      // Navigate to BottomNavBar if logged in
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => BottomNavBar()),
-        (Route<dynamic> route) => false,
-      );
-    } else {
-      // Navigate to OnBoardingScreen if not logged in
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OnBoardingScreen(
-            onDone: () {
-            },
-          ),
+  CommonFunction.hideLoadingDialog(context);
+
+  print("User token: ${UserConstant.TOKEN}");
+  if (UserConstant.TOKEN != null) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => BottomNavBar()),
+      (Route<dynamic> route) => false,
+    );
+  } else {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OnBoardingScreen(
+          onDone: () {},
         ),
-        (Route<dynamic> route) => false,
-      );
-    }
+      ),
+      (Route<dynamic> route) => false,
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

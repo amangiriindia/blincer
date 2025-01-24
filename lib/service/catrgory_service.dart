@@ -27,4 +27,22 @@ class CategoryService {
       throw Exception('Error: ${e.toString()}');
     }
   }
+
+
+   Future<List<dynamic>> getProductsByCategory(String categoryId) async {
+    final url =
+        '${AppConstant.LOCAL_API_URL}/api/v1/product/all-product/category/$categoryId';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['getAllProducts'] as List<dynamic>;
+      } else {
+        throw Exception('Failed to fetch products');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
 }
