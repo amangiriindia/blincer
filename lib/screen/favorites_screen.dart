@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:blinker/constant/app_color.dart';
 import '../service/wishlist_service.dart';
@@ -48,6 +49,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 itemCount: favoriteItems.length,
                 itemBuilder: (context, index) {
                   final item = favoriteItems[index];
+                  final int price = item["price"] ?? 0; // Assuming price is available
+                
+                    Uint8List? imageBytes;
+      if (item['itemImage'] != null && item['itemImage']['data'] != null) {
+        imageBytes = Uint8List.fromList(List<int>.from(item['itemImage']['data']));
+      }
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Card(
@@ -62,24 +70,23 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             // Image
                             ClipRRect(
                               borderRadius: BorderRadius.circular(16),
-                              child: Image.network(
-                                item["image"], // Assuming the image is a URL
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.grey[300],
-                                    width: 100,
-                                    height: 100,
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 40,
-                                      color: Colors.grey[500],
+                              child: imageBytes != null
+                                  ? Image.memory(
+                                      imageBytes,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      color: Colors.grey[300],
+                                      width: 100,
+                                      height: 100,
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        size: 40,
+                                        color: Colors.grey[500],
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
                             ),
                             // Item Details
                             Expanded(
@@ -89,7 +96,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      item["name"], // Display the name
+                                      item["name"] ?? 'No Name', // Display the name
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -97,14 +104,19 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                       ),
                                     ),
                                     SizedBox(height: 4),
-                                    Text(
-                                      item["description"] ?? 'No description',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.currency_rupee, size: 14, color: Colors.black),
+                                        Text(
+                                          "$price",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
