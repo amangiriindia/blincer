@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../screenutills/product_details_screen.dart';
 import '../service/product_service.dart';
 import '../service/weather_service.dart';
+import '../service/wishlist_service.dart';
 import '../widget/location_popup.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ProductService _productService = ProductService();
   List<dynamic> _products = [];
   bool _isLoading = true;
+  final WishlistService wishlistService = WishlistService();
 
   @override
   void initState() {
@@ -206,172 +208,182 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductGrid() {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
 
-    if (_products.isEmpty) {
-      return Center(child: Text("No products found."));
-    }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 4/ 6,
-      ),
-      itemCount: _products.length,
-      itemBuilder: (context, index) {
-        final product = _products[index];
-        if (product == null) return Container();
+Widget _buildProductGrid() {
 
-        final String productId = product['_id'] ?? '';
-        final String name = product['name'] ?? 'No Name';
-        final int price = product['price'] ?? 0;
+  
+  if (_isLoading) {
+    return Center(child: CircularProgressIndicator());
+  }
 
-        Uint8List? imageBytes;
-        if (product['itemImage'] != null &&
-            product['itemImage']['data'] != null) {
-          imageBytes =
-              Uint8List.fromList(List<int>.from(product['itemImage']['data']));
-        }
+  if (_products.isEmpty) {
+    return Center(child: Text("No products found."));
+  }
 
-        ValueNotifier<bool> isLiked = ValueNotifier(false);
+  return GridView.builder(
+    shrinkWrap: true,
+    physics: NeverScrollableScrollPhysics(),
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      childAspectRatio: 4 / 6,
+    ),
+    itemCount: _products.length,
+    itemBuilder: (context, index) {
+      final product = _products[index];
+      if (product == null) return Container();
 
-        return GestureDetector(
-          onTap: () {
-            if (productId.isNotEmpty) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ProductDetailsScreen(productId: productId),
-                ),
-              );
-            }
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  blurRadius: 10,
-                  spreadRadius: 3,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(16)),
-                      child: imageBytes != null
-                          ? Image.memory(
-                              imageBytes,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: 140,
-                            )
-                          : Container(
-                              height: 140,
-                              color: Colors.grey[200],
-                              child: Icon(Icons.image,
-                                  size: 50, color: Colors.grey),
+      final String productId = product['_id'] ?? '';
+      final String name = product['name'] ?? 'No Name';
+      final int price = product['price'] ?? 0;
+
+      Uint8List? imageBytes;
+      if (product['itemImage'] != null && product['itemImage']['data'] != null) {
+        imageBytes = Uint8List.fromList(List<int>.from(product['itemImage']['data']));
+      }
+
+      ValueNotifier<bool> isLiked = ValueNotifier(false);
+
+      // Check if product is in wishlist
+      wishlistService.getWishlist().then((wishlistData) {
+        isLiked.value = wishlistData.any((item) => item['id'] == productId);
+      });
+
+      return GestureDetector(
+        onTap: () {
+          if (productId.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailsScreen(productId: productId),
+              ),
+            );
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 3,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                    child: imageBytes != null
+                        ? Image.memory(
+                            imageBytes,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 140,
+                          )
+                        : Container(
+                            height: 140,
+                            color: Colors.grey[200],
+                            child: Icon(Icons.image, size: 50, color: Colors.grey),
+                          ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: ValueListenableBuilder(
+                      valueListenable: isLiked,
+                      builder: (context, value, child) {
+                        return GestureDetector(
+                          onTap: () {
+                            if (value) {
+                              // Remove from wishlist
+                              wishlistService.removeFromWishlist(productId);
+                            } else {
+                              // Add to wishlist
+                              wishlistService.addToWishlist(product);
+                            }
+                            isLiked.value = !value; // Toggle like state
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              value ? Icons.favorite : Icons.favorite_border,
+                              color: value ? Colors.red : Colors.grey,
                             ),
+                          ),
+                        );
+                      },
                     ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: ValueListenableBuilder(
-                        valueListenable: isLiked,
-                        builder: (context, value, child) {
-                          return GestureDetector(
-                            onTap: () => isLiked.value = !isLiked.value,
-                            child: CircleAvatar(
-                              backgroundColor: Colors.white,
-                              child: Icon(
-                                value ? Icons.favorite : Icons.favorite_border,
-                                color: value ? Colors.red : Colors.grey,
-                              ),
-                            ),
-                          );
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 2),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.currency_rupee, size: 14, color: Colors.black),
+                        Text(
+                          "$price",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          backgroundColor: AppColor.primary, 
+                        ),
+                        onPressed: () {
+                          // Add to cart logic here
                         },
+                        child: Text(
+                          "Add to Cart",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 2),
-                      
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.currency_rupee,
-                                size: 14, color: Colors.black),
-                            Text(
-                              "$price",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        
-                      ),
-                      SizedBox(height: 5),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            backgroundColor: Colors.deepPurpleAccent,
-                          ),
-                          onPressed: () {
-                            // Add to cart logic here
-                          },
-                          child: Text(
-                            "Add to Cart",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }
