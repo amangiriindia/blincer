@@ -6,6 +6,7 @@ import 'package:photo_view/photo_view_gallery.dart';
 import '../constant/app_color.dart';
 import '../service/product_service.dart';
 
+
 class ProductDetailsScreen extends StatefulWidget {
   final String productId;
 
@@ -76,115 +77,106 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ? Center(child: CircularProgressIndicator())
           : productDetails == null
               ? Center(child: Text('Failed to load product details.'))
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Image Slider
-                      if (imageList.isNotEmpty)
-                        CarouselSlider.builder(
-                          itemCount: imageList.length,
-                          options: CarouselOptions(
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (imageList.isNotEmpty)
+                          CarouselSlider.builder(
+                            itemCount: imageList.length,
+                            options: CarouselOptions(
+                              height: 250,
+                              enlargeCenterPage: true,
+                              autoPlay: true,
+                            ),
+                            itemBuilder: (context, index, _) {
+                              return GestureDetector(
+                                onTap: () => _openFullScreenGallery(index),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.memory(
+                                    imageList[index],
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        else
+                          Container(
                             height: 250,
-                            enlargeCenterPage: true,
-                            autoPlay: true,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Icon(Icons.image, size: 50, color: Colors.grey[700]),
                           ),
-                          itemBuilder: (context, index, _) {
-                            return GestureDetector(
-                              onTap: () => _openFullScreenGallery(index),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.memory(
-                                  imageList[index],
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
+
+                        SizedBox(height: 16),
+                        if (productDetails!['name'] != null)
+                          Text(
+                            productDetails!['name'],
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                        SizedBox(height: 8),
+                        if (productDetails!['description'] != null)
+                          Text(
+                            productDetails!['description'],
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        SizedBox(height: 8),
+                        if (productDetails!['status'] != null)
+                          Text(
+                            'Status: ${productDetails!['status'] ? 'Available' : 'Unavailable'}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: productDetails!['status'] ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        SizedBox(height: 8),
+                        if (productDetails!['price'] != null)
+                          Text(
+                            'Price: ₹${productDetails!['price']}',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                          ),
+                        SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColor.primary,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 12),
+                                  child: Text("Add to Cart", style: TextStyle(fontSize: 18, color: Colors.white)),
                                 ),
                               ),
-                            );
-                          },
-                        )
-                      else
-                        Container(
-                          height: 250,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(Icons.image, size: 50, color: Colors.grey[700]),
-                        ),
-
-                      SizedBox(height: 16),
-
-                      // Product Name
-                      if (productDetails!['name'] != null)
-                        Text(
-                          productDetails!['name'],
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                      SizedBox(height: 8),
-
-                      // Product Description
-                      if (productDetails!['description'] != null)
-                        Text(
-                          productDetails!['description'],
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      SizedBox(height: 8),
-
-                      // Product Status
-                      if (productDetails!['status'] != null)
-                        Text(
-                          'Status: ${productDetails!['status'] ? 'Available' : 'Unavailable'}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: productDetails!['status'] ? Colors.green : Colors.red,
-                          ),
-                        ),
-                      SizedBox(height: 8),
-
-                      // Product Price
-                      if (productDetails!['price'] != null)
-                        Text(
-                          'Price: ₹${productDetails!['price']}',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                        ),
-                      SizedBox(height: 16),
-
-                      // Action Buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColor.primary,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Text("Add to Cart", style: TextStyle(fontSize: 18, color: Colors.white)),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 12),
+                                  child: Text("Buy Now", style: TextStyle(fontSize: 18, color: Colors.white)),
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Text("Buy Now", style: TextStyle(fontSize: 18, color: Colors.white)),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
     );
