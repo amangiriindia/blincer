@@ -14,6 +14,7 @@ class ProductService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success']) {
+           
           return data['getAllProducts'];
         } else {
           throw Exception(data['message']);
@@ -29,7 +30,7 @@ class ProductService {
   Future<Map<String, dynamic>> fetchSingleProduct(String productId) async {
     final response = await http.get(Uri.parse(
         '${AppConstant.LOCAL_API_URL}/api/v1/product/single-product/$productId'));
-    print(response.body);
+    // print(response.body);
     print(response.statusCode);
     if (response.statusCode == 200) {
       final data = json.decode(response.body);

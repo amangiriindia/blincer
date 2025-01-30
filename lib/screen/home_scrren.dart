@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:draggable_home/draggable_home.dart';
 import '../constant/app_color.dart';
@@ -25,42 +24,42 @@ class _HomeScreenState extends State<HomeScreen> {
   String weatherIconUrl = '';
   double temperature = 0.0;
   String? currentAddress;
-final ProductService _productService = ProductService();
-List<dynamic> _products = [];
-bool _isLoading = true;
-
+  final ProductService _productService = ProductService();
+  List<dynamic> _products = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-   // _getCurrentWeather('Bengaluru'); // Default city
-   _fetchProducts();
+    // _getCurrentWeather('Bengaluru'); // Default city
+    _fetchProducts();
   }
 
   void _showLocationModal() {
     showLocationModal(context);
   }
+
   Future<void> _fetchProducts() async {
-  try {
-    setState(() {
-      _isLoading = true;
-    });
-    final products = await _productService.fetchProducts('grocery');
-    setState(() {
-      _products = products;
-      _isLoading = false;
-    });
-  } catch (e) {
-    setState(() {
-      _isLoading = false;
-    });
-    print('Error fetching products: $e');
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      final products = await _productService.fetchProducts('grocery');
+      setState(() {
+        _products = products;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error fetching products: $e');
+    }
   }
-}
 
   Future<void> _getCurrentWeather(String city) async {
     try {
-     final weatherData = await _weatherService.getWeather(city);
+      final weatherData = await _weatherService.getWeather(city);
       setState(() {
         weatherCondition = weatherData['current']['condition']['text'];
         weatherIconUrl = "https:${weatherData['current']['condition']['icon']}";
@@ -128,20 +127,21 @@ bool _isLoading = true;
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
       child: Column(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    weatherIconUrl.isNotEmpty
-        ? Image.network(weatherIconUrl, height: 50)
-        : Icon(Icons.cloud, color: Colors.white, size: 50), // Default cloud icon
-    SizedBox(height: 8),
-    Text(
-      "$weatherCondition | ${temperature.toStringAsFixed(1)}°C",
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          weatherIconUrl.isNotEmpty
+              ? Image.network(weatherIconUrl, height: 50)
+              : Icon(Icons.cloud,
+                  color: Colors.white, size: 50), // Default cloud icon
+          SizedBox(height: 8),
+          Text(
+            "$weatherCondition | ${temperature.toStringAsFixed(1)}°C",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           SizedBox(height: 8),
           Text("Welcome to Blincer",
               style: TextStyle(
@@ -206,7 +206,10 @@ bool _isLoading = true;
     );
   }
 
-  Widget _buildProductGrid() {
+
+
+
+Widget _buildProductGrid() {
   if (_isLoading) {
     return Center(child: CircularProgressIndicator());
   }
@@ -227,14 +230,28 @@ bool _isLoading = true;
     itemCount: _products.length,
     itemBuilder: (context, index) {
       final product = _products[index];
+      if (product == null) return Container();
+
+      final String productId = product['_id'] ?? '';
+      final String name = product['name'] ?? 'No Name';
+      final int price = product['price'] ?? 0;
+
+      // Extract image
+      Uint8List? imageBytes;
+      if (product['itemImage'] != null && product['itemImage']['data'] != null) {
+        imageBytes = Uint8List.fromList(List<int>.from(product['itemImage']['data']));
+      }
+
       return GestureDetector(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailsScreen(productId: product['_id']),
-            ),
-          );
+          if (productId.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailsScreen(productId: productId),
+              ),
+            );
+          }
         },
         child: Container(
           decoration: BoxDecoration(
@@ -251,35 +268,66 @@ bool _isLoading = true;
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Product Image
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  child: product['store']['logo']['Data']['data'] != null
+                  child: imageBytes != null
                       ? Image.memory(
-                          Uint8List.fromList(
-                              List<int>.from(product['store']['logo']['Data']['data'])),
+                          imageBytes,
                           fit: BoxFit.cover,
+                          width: double.infinity,
                         )
-                      : Icon(Icons.image, size: 50),
+                      : Container(
+                          color: Colors.grey[200],
+                          child: Icon(Icons.image, size: 50, color: Colors.grey),
+                        ),
                 ),
               ),
+
+              // Product Details
               Padding(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Product Name
                     Text(
-                      product['name'] ?? 'No Name',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4),
-                    Text(
-                      product['description'] ?? 'No Description',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+
+                    // Price with INR Icon
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.deepPurple, Colors.indigo],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.currency_rupee, size: 14, color: Colors.white),
+                          Text(
+                            "$price",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -291,5 +339,4 @@ bool _isLoading = true;
     },
   );
 }
-
 }

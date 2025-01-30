@@ -66,14 +66,16 @@ class _CategoryProductScreenState extends State<CategoryProductScreen> {
                         itemCount: _products.length,
                         itemBuilder: (context, index) {
                           final product = _products[index];
-                          final photoData =
-                              product['store']?['logo']?['Data']?['data'];
-                          Uint8List? imageBytes;
+                      
+                          
 
-                          if (photoData != null) {
-                            imageBytes =
-                                Uint8List.fromList(List<int>.from(photoData));
-                          }
+                             // Extract image
+      Uint8List? imageBytes;
+      if (product['itemImage'] != null && product['itemImage']['data'] != null) {
+        imageBytes = Uint8List.fromList(List<int>.from(product['itemImage']['data']));
+      }
+
+      
 
                           return ProductCard(
                             id:product['_id'] ,
