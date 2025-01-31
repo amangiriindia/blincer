@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:share_plus/share_plus.dart';
 import '../constant/app_color.dart';
 import '../service/product_service.dart';
-
 
 class ProductDetailsScreen extends StatefulWidget {
   final String productId;
@@ -18,6 +18,7 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   bool isLoading = true;
+  bool isLiked = false;
   Map<String, dynamic>? productDetails;
   List<Uint8List> imageList = [];
 
@@ -66,12 +67,32 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  void _shareProduct() {
+    if (productDetails != null) {
+      Share.share('Check out this product: ${productDetails!['name']} - ₹${productDetails!['price']}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Product Details'),
         backgroundColor: AppColor.primary,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.favorite, color: isLiked ? Colors.red : Colors.grey),
+            onPressed: () {
+              setState(() {
+                isLiked = !isLiked;
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: _shareProduct,
+          ),
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -147,29 +168,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: ElevatedButton(
+                              child: ElevatedButton.icon(
                                 onPressed: () {},
+                                icon: Icon(Icons.shopping_cart, color: Colors.white),
+                                label: Text("Add to Cart", style: TextStyle(fontSize: 18, color: Colors.white)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColor.primary,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 12),
-                                  child: Text("Add to Cart", style: TextStyle(fontSize: 18, color: Colors.white)),
                                 ),
                               ),
                             ),
                             SizedBox(width: 12),
                             Expanded(
-                              child: ElevatedButton(
+                              child: ElevatedButton.icon(
                                 onPressed: () {},
+                                icon: Icon(Icons.flash_on, color: Colors.white),
+                                label: Text("Buy Now", style: TextStyle(fontSize: 18, color: Colors.white)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.orange,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 12),
-                                  child: Text("Buy Now", style: TextStyle(fontSize: 18, color: Colors.white)),
                                 ),
                               ),
                             ),
@@ -182,6 +199,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 }
+
 
 // Full-Screen Image Viewer
 class FullScreenImageGallery extends StatelessWidget {

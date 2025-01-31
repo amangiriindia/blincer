@@ -46,6 +46,7 @@ dependencies:
   photo_view: ^0.15.0
   sqflite: ^2.3.3+1
   path_provider: ^2.1.5
+  share_plus: ^10.1.4
 
 dev_dependencies:
   flutter_test:
