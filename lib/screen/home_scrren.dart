@@ -6,6 +6,7 @@ import '../constant/voice_to_text.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../screenutills/product_details_screen.dart';
+import '../service/card_service.dart';
 import '../service/product_service.dart';
 import '../service/weather_service.dart';
 import '../service/wishlist_service.dart';
@@ -29,6 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _products = [];
   bool _isLoading = true;
   final WishlistService wishlistService = WishlistService();
+  final CartService cartService = CartService();
+
 
   @override
   void initState() {
@@ -356,26 +359,33 @@ Widget _buildProductGrid() {
                     ),
                     SizedBox(height: 5),
                     SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          backgroundColor: AppColor.primary, 
-                        ),
-                        onPressed: () {
-                          // Add to cart logic here
-                        },
-                        child: Text(
-                          "Add to Cart",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
+  width: double.infinity,
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      backgroundColor: AppColor.primary, 
+    ),
+    onPressed: () async {
+      // Add product to cart logic here
+      await cartService.addToCart(product);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added to cart!')),
+      );
+    },
+    child: Text(
+      "Add to Cart",
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+),
+
                   ],
                 ),
               ),
