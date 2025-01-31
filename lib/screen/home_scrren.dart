@@ -6,6 +6,7 @@ import '../constant/voice_to_text.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../screenutills/product_details_screen.dart';
+import '../screenutills/search_screen.dart';
 import '../service/card_service.dart';
 import '../service/product_service.dart';
 import '../service/weather_service.dart';
@@ -26,12 +27,11 @@ class _HomeScreenState extends State<HomeScreen> {
   String weatherIconUrl = '';
   double temperature = 0.0;
   String? currentAddress;
-  final ProductService _productService = ProductService();
   List<dynamic> _products = [];
   bool _isLoading = true;
+  final ProductService _productService = ProductService();
   final WishlistService wishlistService = WishlistService();
   final CartService cartService = CartService();
-
 
   @override
   void initState() {
@@ -84,13 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return DraggableHome(
       title: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColor.primary, AppColor.secondary],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
@@ -98,14 +91,14 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: _showLocationModal,
               child: Row(
                 children: [
-                  Icon(Icons.location_on, color: Colors.white),
-                  SizedBox(width: 5),
+                  Icon(Icons.location_on, color: AppColor.primary, size: 28),
+                  SizedBox(width: 8),
                   Text(
                     currentLocation,
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      fontSize: 20, // Slightly larger for emphasis
+                      fontWeight: FontWeight.w600, // Modern, semi-bold weight
+                      color: AppColor.primary,
                     ),
                   ),
                 ],
@@ -114,7 +107,26 @@ class _HomeScreenState extends State<HomeScreen> {
             Spacer(),
             GestureDetector(
               onTap: () {}, // Add functionality for notifications
-              child: Icon(Icons.notifications, color: Colors.white),
+              child:
+                  Icon(Icons.notifications, color: AppColor.primary, size: 28),
+            ),
+            SizedBox(
+                width: 16), // Space between the notification and search icon
+            GestureDetector(
+              onTap: () {
+                // Navigate to the Search Screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          SearchScreen()), // Replace with your actual SearchScreen widget
+                );
+              },
+              child: Icon(
+                Icons.search,
+                color: AppColor.primary,
+                size: 28,
+              ),
             ),
           ],
         ),
@@ -167,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSearchBar(),
+          _buildSearchBar(context),
           SizedBox(height: 20),
           Text("Hello, $name!",
               style: TextStyle(
@@ -187,8 +199,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Row(
+  Widget _buildSearchBar(BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      // Navigate to SearchScreen when the search bar is tapped
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SearchScreen()),
+      );
+    },
+    child: Container(
+      child:  Row(
       children: [
         Expanded(
           child: TextField(
@@ -208,192 +229,196 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    );
-  }
-
-
-
-Widget _buildProductGrid() {
-
-  
-  if (_isLoading) {
-    return Center(child: CircularProgressIndicator());
-  }
-
-  if (_products.isEmpty) {
-    return Center(child: Text("No products found."));
-  }
-
-  return GridView.builder(
-    shrinkWrap: true,
-    physics: NeverScrollableScrollPhysics(),
-    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 4 / 6,
     ),
-    itemCount: _products.length,
-    itemBuilder: (context, index) {
-      final product = _products[index];
-      if (product == null) return Container();
-
-      final String productId = product['_id'] ?? '';
-      final String name = product['name'] ?? 'No Name';
-      final int price = product['price'] ?? 0;
-
-      Uint8List? imageBytes;
-      if (product['itemImage'] != null && product['itemImage']['data'] != null) {
-        imageBytes = Uint8List.fromList(List<int>.from(product['itemImage']['data']));
-      }
-
-      ValueNotifier<bool> isLiked = ValueNotifier(false);
-
-      // Check if product is in wishlist
-      wishlistService.getWishlist().then((wishlistData) {
-        isLiked.value = wishlistData.any((item) => item['id'] == productId);
-      });
-
-      return GestureDetector(
-        onTap: () {
-          if (productId.isNotEmpty) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailsScreen(productId: productId),
-              ),
-            );
-          }
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                blurRadius: 10,
-                spreadRadius: 3,
-                offset: Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                    child: imageBytes != null
-                        ? Image.memory(
-                            imageBytes,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 140,
-                          )
-                        : Container(
-                            height: 140,
-                            color: Colors.grey[200],
-                            child: Icon(Icons.image, size: 50, color: Colors.grey),
-                          ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: ValueListenableBuilder(
-                      valueListenable: isLiked,
-                      builder: (context, value, child) {
-                        return GestureDetector(
-                          onTap: () {
-                            if (value) {
-                              // Remove from wishlist
-                              wishlistService.removeFromWishlist(productId);
-                            } else {
-                              // Add to wishlist
-                              wishlistService.addToWishlist(product);
-                            }
-                            isLiked.value = !value; // Toggle like state
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(
-                              value ? Icons.favorite : Icons.favorite_border,
-                              color: value ? Colors.red : Colors.grey,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 2),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.currency_rupee, size: 14, color: Colors.black),
-                        Text(
-                          "$price",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5),
-                    SizedBox(
-  width: double.infinity,
-  child: ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      backgroundColor: AppColor.primary, 
     ),
-    onPressed: () async {
-      // Add product to cart logic here
-      await cartService.addToCart(product);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Added to cart!')),
-      );
-    },
-    child: Text(
-      "Add to Cart",
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-  ),
-),
-
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
   );
 }
+
+
+  Widget _buildProductGrid() {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (_products.isEmpty) {
+      return Center(child: Text("No products found."));
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 4 / 6,
+      ),
+      itemCount: _products.length,
+      itemBuilder: (context, index) {
+        final product = _products[index];
+        if (product == null) return Container();
+
+        final String productId = product['_id'] ?? '';
+        final String name = product['name'] ?? 'No Name';
+        final int price = product['price'] ?? 0;
+
+        Uint8List? imageBytes;
+        if (product['itemImage'] != null &&
+            product['itemImage']['data'] != null) {
+          imageBytes =
+              Uint8List.fromList(List<int>.from(product['itemImage']['data']));
+        }
+
+        ValueNotifier<bool> isLiked = ValueNotifier(false);
+
+        // Check if product is in wishlist
+        wishlistService.getWishlist().then((wishlistData) {
+          isLiked.value = wishlistData.any((item) => item['id'] == productId);
+        });
+
+        return GestureDetector(
+          onTap: () {
+            if (productId.isNotEmpty) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ProductDetailsScreen(productId: productId),
+                ),
+              );
+            }
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 3,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16)),
+                      child: imageBytes != null
+                          ? Image.memory(
+                              imageBytes,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 140,
+                            )
+                          : Container(
+                              height: 140,
+                              color: Colors.grey[200],
+                              child: Icon(Icons.image,
+                                  size: 50, color: Colors.grey),
+                            ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: ValueListenableBuilder(
+                        valueListenable: isLiked,
+                        builder: (context, value, child) {
+                          return GestureDetector(
+                            onTap: () {
+                              if (value) {
+                                // Remove from wishlist
+                                wishlistService.removeFromWishlist(productId);
+                              } else {
+                                // Add to wishlist
+                                wishlistService.addToWishlist(product);
+                              }
+                              isLiked.value = !value; // Toggle like state
+                            },
+                            child: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: Icon(
+                                value ? Icons.favorite : Icons.favorite_border,
+                                color: value ? Colors.red : Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 2),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.currency_rupee,
+                              size: 14, color: Colors.black),
+                          Text(
+                            "$price",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 5),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            backgroundColor: AppColor.primary,
+                          ),
+                          onPressed: () async {
+                            // Add product to cart logic here
+                            await cartService.addToCart(product);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Added to cart!')),
+                            );
+                          },
+                          child: Text(
+                            "Add to Cart",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
