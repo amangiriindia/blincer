@@ -38,7 +38,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           controller: _controller,
           children: [
             _buildOnboardingPage(
-              'Welcome to Blincer!',
+              'Welcome to blinker!',
               'assets/anim/anim-1.json', // Local path for the animation
               'Your ultimate destination for all your shopping needs.',
             ),

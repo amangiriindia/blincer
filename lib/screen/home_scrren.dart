@@ -21,7 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final WeatherService _weatherService = WeatherService();
-  String name = 'Blinker User';
+  String name = 'blinker User';
   String currentLocation = 'Fetching...';
   String weatherCondition = '';
   String weatherIconUrl = '';
@@ -160,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           SizedBox(height: 8),
-          Text("Welcome to Blincer",
+          Text("Welcome to blinker",
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
