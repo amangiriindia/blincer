@@ -1,3 +1,17 @@
+buildscript {
+    ext.kotlin_version = '1.8.22' // Define Kotlin version globally
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1' // Use latest stable AGP
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -5,12 +19,13 @@ allprojects {
     }
 }
 
+// Ensure proper build directory structure
 rootProject.buildDir = "../build"
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 
-    // Ensuring evaluation order only if the project is not 'app'
+    // Ensure evaluation order only for non-'app' modules
     if (project.name != 'app') {
         evaluationDependsOn(':app')
     }
@@ -23,6 +38,7 @@ subprojects {
     }
 }
 
+// Register clean task correctly
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
