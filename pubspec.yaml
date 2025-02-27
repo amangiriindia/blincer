@@ -24,6 +24,10 @@ dependencies:
   path_provider: ^2.1.5
   share_plus: ^10.1.4
   flutter_launcher_icons: ^0.14.3
+  flutter_vector_icons: ^2.0.0
+  flutter_animate: ^4.5.2
+  image_picker: ^1.1.2
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_test:

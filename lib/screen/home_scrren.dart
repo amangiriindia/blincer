@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:blinker/screen/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:draggable_home/draggable_home.dart';
 import '../constant/app_color.dart';
@@ -106,7 +107,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Spacer(),
             GestureDetector(
-              onTap: () {}, // Add functionality for notifications
+              onTap: () {
+                
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          NotificationScreen()), // Replace with your actual SearchScreen widget
+                );
+              }, // Add functionality for notifications
               child:
                   Icon(Icons.notifications, color: AppColor.primary, size: 28),
             ),

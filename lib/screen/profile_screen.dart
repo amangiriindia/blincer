@@ -1,7 +1,12 @@
 import 'package:blinker/constant/app_color.dart';
+import 'package:blinker/screen/about_us.dart';
+import 'package:blinker/screen/edit_profile_screen.dart';
+import 'package:blinker/screen/manage_address_screen.dart';
+import 'package:blinker/screen/order_screen.dart';
+import 'package:blinker/screen/setting_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../constant/app_constant.dart';
+import 'customer_support.dart';
+import 'favorites_screen.dart';
 
 
 
@@ -81,48 +86,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _ProfileOptionItem(
                           icon: Icons.shopping_cart_outlined,
                           text: 'View Orders',
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => OrderScreen()),
+                            );
+                          },
                         ),
                         _ProfileOptionItem(
                           icon: Icons.favorite_border,
                           text: 'Wishlist',
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => FavoritesScreen()),
+                            );
+                          },
                         ),
                         const Divider(),
                         const _SectionHeader(text: 'Account Settings'),
                         _ProfileOptionItem(
                           icon: Icons.account_circle_outlined,
                           text: 'Profile',
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                            );
+                          },
                         ),
                         _ProfileOptionItem(
                           icon: Icons.location_on_outlined,
                           text: 'Manage Addresses',
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ManageAddressesScreen()),
+                            );
+                          },  
                         ),
-                        _ProfileOptionItem(
-                          icon: Icons.payment_outlined,
-                          text: 'Payment Methods',
-                          onTap: () {},
-                        ),
+                        
                         const Divider(),
                         const _SectionHeader(text: 'Support'),
+                        
                         _ProfileOptionItem(
                           icon: Icons.help_outline,
                           text: 'Help & Support',
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => CustomerSupportScreen()),
+                            );
+                          },
                         ),
                         _ProfileOptionItem(
                           icon: Icons.info_outline,
                           text: 'About Us',
-                          onTap: () {},
+                          onTap: () {
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => AboutUsScreen()),
+                            );
+                          },  
                         ),
                         const Divider(),
                         const _SectionHeader(text: 'More'),
                         _ProfileOptionItem(
                           icon: Icons.settings,
                           text: 'Settings',
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => SettingsScreen()),
+                            );
+                          },
                         ),
                         _ProfileOptionItem(
                           icon: Icons.logout,
